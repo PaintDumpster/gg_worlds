@@ -402,6 +402,7 @@ FodyWeavers.xsd
 # amoebas folder
 data/
 cache/
+.gg_env/
 
 
 # Exported Objs
