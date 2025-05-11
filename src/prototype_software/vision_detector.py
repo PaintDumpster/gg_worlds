@@ -54,5 +54,26 @@ class visionDetector:
         
         
     def draw_contours(self,mask,desc,color):
-        cv.imshow('hsv_format',self.r_mask)
+        contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        for cnt in contours:
+            area = cv.contourArea(cnt)
+            if area > 1000:
+                x,y,w,h = cv.boundingRect(cnt)
+                cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 2)
+                cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                pos_data ={'x':x,'y':y,'w':w,'h':h}
+                return pos_data
+            
+    def detect(self):
+        try:
+            
+            red_pos = self.draw_contours(self.r_mask, "Red", (0, 0, 255))
+            green_pos = self.draw_contours(self.g_mask, "Green", (0, 255, 0))
+            blue_pos = self.draw_contours(self.b_mask, "Blue", (255, 0, 0))
+            
+            return red_pos, green_pos, blue_pos
+        except Exception as e:
+            print(f"Error in detect: {e}")
+            return None, None, None
         
+        cv.imshow("Camera Input", self.camera_input)
