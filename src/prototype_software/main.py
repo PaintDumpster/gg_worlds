@@ -16,6 +16,7 @@ if __name__ == "__main__":
         vd = visionDetector(video)
         vd.detect_color()
         vd.detect()
+        vd.show()
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
     picam2.stop()

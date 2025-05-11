@@ -66,7 +66,7 @@ class visionDetector:
             
     def detect(self):
         try:
-            
+
             red_pos = self.draw_contours(self.r_mask, "Red", (0, 0, 255))
             green_pos = self.draw_contours(self.g_mask, "Green", (0, 255, 0))
             blue_pos = self.draw_contours(self.b_mask, "Blue", (255, 0, 0))
@@ -75,5 +75,7 @@ class visionDetector:
         except Exception as e:
             print(f"Error in detect: {e}")
             return None, None, None
+        
+    def show(self):
         
         cv.imshow("Camera Input", self.camera_input)
