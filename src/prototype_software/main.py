@@ -1,5 +1,5 @@
 import cv2 as cv
-#from vision_detector import VisionDetector as vd
+from vision_detector import visionDetector
 from picamera2 import Picamera2
 import time
 
@@ -13,7 +13,8 @@ if __name__ == "__main__":
     
     while True:
         video = picam2.capture_array()
-        cv.imshow("output", video)
+        vd = visionDetector(video)
+        vd.detect_color()
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
     picam2.stop()
