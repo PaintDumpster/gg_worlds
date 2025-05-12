@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 class visionDetector:
     def __init__(self, camera_input=None):
@@ -51,28 +52,44 @@ class visionDetector:
         self.b_mask = cv.inRange(hsv, 
         self.colors['blue']['lower'],
         self.colors['blue']['upper'])
-        
-        
+
     def draw_contours(self,mask,desc,color):
+
+        if mask is None:
+            return None
+        
         contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        for i,cnt in contours:
+
+        if len(contours) == 0:
+            return None
+        
+        detections = []
+
+        for i, cnt in enumerate(contours):
+            time.sleep(0.1)
             area = cv.contourArea(cnt)
             if area > 1000:
                 x,y,w,h = cv.boundingRect(cnt)
                 cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 2)
                 cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                pos_data ={
-                    f"{i}. {desc} detection":{
+                detections.append =({
+                    f"{desc} {i}":{
                         'x':x,
                         'y':y,
                         'w':w,
-                        'h':h
+                        'h':h,
+                        'center':{
+                            'x': x + w // 2,
+                            'y': y + h // 2
+                        }
                     }
-                }
-                return pos_data
+                })
+        return detections if detections else None
             
     def detect(self):
         try:
+            if not all([self.r_mask, self.g_mask, self.b_mask]):
+                self.detect_color()
 
             red_pos = self.draw_contours(self.r_mask, "Red", (0, 0, 255))
             green_pos = self.draw_contours(self.g_mask, "Green", (0, 255, 0))
