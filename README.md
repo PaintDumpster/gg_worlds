@@ -5,13 +5,13 @@
 
 **1 . How it works**
 
-  Component____________________________________Role
+  Component →→→→ Role
 
-  - SDXL 1.0 base checkpoint_________________The core image generator (large UNet + VAE + CLIP‑TE)
+  - SDXL 1.0 base checkpoint →→→→ The core image generator (large UNet + VAE + CLIP‑TE)
 
-  - T2I‑Adapter (depth‑midas‑sdxl‑1.0________Reads the input depth/height map and injects "terrain awareness" into the UNet
+  - T2I‑Adapter (depth‑midas‑sdxl‑1.0 →→→→ Reads the input depth/height map and injects "terrain awareness" into the UNet
 
-  - ComfyUI____________________________________Node/graph interface to wire everything together and run locally (GPU)
+  - ComfyUI →→→→ Node/graph interface to wire everything together and run locally (GPU)
 
 When you press Run, ComfyUI:
   1. Encodes your prompt with SDXL’s CLIP text encoder.
@@ -25,15 +25,15 @@ When you press Run, ComfyUI:
 
 **2 . Prerequisites**
 
- Item____________________________________________________Minimum
+ Item →→→→ Minimum
 
-  - GPU________________________________________________NVIDIA GTX 10‑series or newer (RTX preferred) — 8 GB VRAM+ for 1024×1024
+  - GPU →→→→ NVIDIA GTX 10‑series or newer (RTX preferred) — 8 GB VRAM+ for 1024×1024
 
-  - Windows / Linux / macOS (AMD/Apple OK)_______Tested on Win 10 + RTX 3060 Laptop
+  - Windows / Linux / macOS (AMD/Apple OK) →→→→ Tested on Win 10 + RTX 3060 Laptop
 
-  - Python 3.10________________________________________Required (3.13 causes package issues)
+  - Python 3.10 →→→→ Required (3.13 causes package issues)
 
-  - ComfyUI____________________________________________Portable or manual install
+  - ComfyUI →→→→ Portable or manual install
 
 (CUDA toolkit is not required; the portable build ships its own.)
 
@@ -66,27 +66,33 @@ Browser opens at http://127.0.0.1:8188.
 
 **5 . Build the ComfyUI graph (nodes)**
 
-    [Load Checkpoint]  → model/clip/vae → 
-                      [SDXL Prompt Encode] →  
-    [Load Image] ─┐                           ┐
-                  └→ [Apply ControlNet] → KSampler → VAE Decode → Preview/Save
-              
-    [ControlNet Loader] ┘
+     [Load Checkpoint]    (sd_xl_base_1.0.safetensors)
+        ├ model ─────┐
+        ├ clip  → [SDXL Prompt Encode] ->+ positive/negative
+        └ vae   ─────┘
+                                ↓
+    [ControlNet Loader] (t2i‑adapter‑depth‑midas‑sdxl‑1.0)
+        ↓
+    [Load Image] (grayscale depth PNG)  → [Apply ControlNet] → latent
+                                ↓
+    [ KSampler ]   width=1024 height=1024 steps=25 cfg=7 scheduler=euler_a
+        ↓
+    [ VAE Decode ] → [Preview / Save Image]
 
 
-Node___________________________Key setting
+Node →→→→ Key setting
 
-  - Load Checkpoint___________sd_xl_base_1.0.safetensors
+  - Load Checkpoint →→→→ sd_xl_base_1.0.safetensors
 
-  - SDXL Prompt Encode_______positive / negative prompts
+  - SDXL Prompt Encode →→→→ positive / negative prompts
 
-  - Load Image________________your grayscale height PNG (1024×1024)
+  - Load Image →→→→ your grayscale height PNG (1024×1024)
 
-  - ControlNet Loader_________t2i-adapter-depth-midas-sdxl-1.0.safetensors
+  - ControlNet Loader →→→→ t2i-adapter-depth-midas-sdxl-1.0.safetensors
 
-  - Apply ControlNet__________strength 1.0  start 0  end 1
+  - Apply ControlNet →→→→ strength 1.0  start 0  end 1
 
-  - KSampler__________________25 steps · Euler a · cfg 7
+  - KSampler →→→→ 25 steps · Euler a · cfg 7
 
 (Drag SDXL Prompt Encode from the node menu: conditioning → SDXL Prompt Encode.)
 
@@ -103,15 +109,22 @@ Node___________________________Key setting
 
 **- Parameter tips**
 
-Issue_________________________Fix
+Issue →→→→ Fix
 
-- Roads ignore relief_____raise strength to 1.2 or reduce cfg
+- Roads ignore relief →→→→ raise strength to 1.2 or reduce cfg
 
-- Too rigid_______________lower strength to 0.6 or set start_percent 0.2
+- Too rigid →→→→ lower strength to 0.6 or set start_percent 0.2
 
-- Blurry__________________increase steps to 30 or try DPM++ 2M Karras
+- Blurry →→→→ increase steps to 30 or try DPM++ 2M Karras
 
 **7 . Calling via the ComfyUI API**
+
+Running
+      
+    python main.py
+UI → http://127.0.0.1:8188
+
+API → POST JSON workflow to http://127.0.0.1:8188/prompt
 
     import json, requests
     wf = json.load(open(r"C:\ComfyUI\workflows\depth_adapter_sdxl.json"))
@@ -123,20 +136,32 @@ Issue_________________________Fix
 
 **8 . Troubleshooting**
 
-Error_________________________________________Cause / fix
+Erro     →→→→     Cause / fix
 
-Missing torch‑CUDA_________________________Install GPU build: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+Missing torch‑CUDA    →→→→    Install GPU build: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-comfyui‑frontend‑package not installed____pip install -r requirements.txt (Python 3.10 recommended)
+comfyui‑frontend‑package not installed →→→→ pip install -r requirements.txt (Python 3.10 recommended)
 
-Black output_________________________________Height map too small → upscale to 1024² or increase steps
+Black output → Height map too small →→→→ upscale to 1024² or increase steps
+
+ModuleNotFoundError →→→→ yaml	pip install pyyaml
+
+ModuleNotFoundError →→→→ torchsde	pip install torchsde
+
+Torch not compiled with CUDA enabled →→→→ uninstall torch → reinstall cu118 wheel
+
+comfyui-frontend-package is not installed →→→→ pip install -r requirements.txt
+
+2 GB torch wheel aborts with No space left on device →→→→ free ≥ 8 GB on C: drive
 
 **9 . Credits**
 
 - T2I‑Adapter © Tencent ARC (https://github.com/TencentARC/T2I-Adapter)
 
-- Stable Diffusion XL © Stability AI
+- Stable Diffusion XL – CreativeML Open RAIL‑M
 
-- ComfyUI © comfyanonymous
+- ComfyUI – Apache 2.0
+
+- Height‑map dataset: NASADEM (NASA JPL)
 
 (MIT License – use at your own risk.)
