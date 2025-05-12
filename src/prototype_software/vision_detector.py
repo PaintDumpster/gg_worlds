@@ -66,13 +66,12 @@ class visionDetector:
         detections = []
 
         for i, cnt in enumerate(contours):
-            time.sleep(0.1)
             area = cv.contourArea(cnt)
             if area > 1000:
                 x,y,w,h = cv.boundingRect(cnt)
                 cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 2)
                 cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                detections.append =({
+                detections.append({
                     f"{desc} {i}":{
                         'x':x,
                         'y':y,
@@ -88,7 +87,7 @@ class visionDetector:
             
     def detect(self):
         try:
-            if not all([self.r_mask, self.g_mask, self.b_mask]):
+            if self.r_mask is None or self.g_mask is None or self.b_mask is None:
                 self.detect_color()
 
             red_pos = self.draw_contours(self.r_mask, "Red", (0, 0, 255))
