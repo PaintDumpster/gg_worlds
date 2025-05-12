@@ -55,13 +55,20 @@ class visionDetector:
         
     def draw_contours(self,mask,desc,color):
         contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        for cnt in contours:
+        for i,cnt in contours:
             area = cv.contourArea(cnt)
             if area > 1000:
                 x,y,w,h = cv.boundingRect(cnt)
                 cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 2)
                 cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-                pos_data ={'x':x,'y':y,'w':w,'h':h}
+                pos_data ={
+                    f"{i}. {desc} detection":{
+                        'x':x,
+                        'y':y,
+                        'w':w,
+                        'h':h
+                    }
+                }
                 return pos_data
             
     def detect(self):

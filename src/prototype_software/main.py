@@ -15,7 +15,7 @@ if __name__ == "__main__":
         video = picam2.capture_array()
         vd = visionDetector(video)
         vd.detect_color()
-        vd.detect()
+        red_pos, green_pos, blue_pos = vd.detect()
         vd.show()
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
