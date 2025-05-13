@@ -3,6 +3,8 @@
 
 **Goal:** *turn a grayscale height/depth map into a realistic street‑layout image that hugs the terrain, using Stable Diffusion XL and the T2I‑Adapter (depth‑MiDaS) inside ComfyUI.*
 
+![workflow 2](https://github.com/user-attachments/assets/277199f8-7485-4600-95aa-3d8603d71422)
+
 ![lugano](https://github.com/user-attachments/assets/4e7aba1b-781e-44e1-bdd9-f5a35ae2aede)
 
 ![ComfyUI_temp_aapeh_00004_](https://github.com/user-attachments/assets/e6b58467-2de0-487a-9b08-300aaa58cd57)
