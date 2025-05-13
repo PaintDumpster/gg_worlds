@@ -403,6 +403,7 @@ FodyWeavers.xsd
 data/
 cache/
 .gg_env/
+src/prototype_software/interactive_interfaces/
 
 
 # Exported Objs

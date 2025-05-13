@@ -69,8 +69,8 @@ class visionDetector:
             area = cv.contourArea(cnt)
             if area > 1000:
                 x,y,w,h = cv.boundingRect(cnt)
-                cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 2)
-                cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 3)
+                cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 1.5, color, 2)
                 detections.append({
                     f"{desc} {i}":{
                         'x':x,
@@ -83,8 +83,21 @@ class visionDetector:
                         }
                     }
                 })
+
         return detections if detections else None
-            
+    
+    def draw_json(self, positions, color):
+        for pos in positions:
+            for key, value in pos.items():
+                x = value['x']
+                y = value['y']
+                w = value['w']
+                h = value['h']
+                center_x = value['center']['x']
+                center_y = value['center']['y']
+                
+                cv.putText(self.camera_input, f"{key}:({center_x}, {center_y})", (x, y - 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+
     def detect(self):
         try:
             if self.r_mask is None or self.g_mask is None or self.b_mask is None:
