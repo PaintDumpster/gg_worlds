@@ -1,7 +1,7 @@
 # ***Terrain‑Aware Street‑Layout Generation with ComfyUI + T2I‑Adapter***
 
 
-**Goal:** *turn a grayscale height/depth map into a realistic street‑layout image that hugs the terrain, using Stable Diffusion XL and the T2I‑Adapter (depth‑MiDaS) inside ComfyUI.*
+**Goal:** *turn a grayscale height/depth map into a realistic street‑layout image that hugs the terrain, using Stable Diffusion XL and the T2I‑Adapter (depth‑MiDaS)/(depth‑ZoeS) inside ComfyUI.*
 
 ![workflow 2](https://github.com/user-attachments/assets/277199f8-7485-4600-95aa-3d8603d71422)
 
