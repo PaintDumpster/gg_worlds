@@ -1,0 +1,8 @@
+peft
+flask
+torch
+diffusers
+transformers
+safetensors
+accelerate
+scipy
