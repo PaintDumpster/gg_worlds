@@ -23,7 +23,7 @@ class DetectionDataHandler(BaseHTTPRequestHandler):
         if self.path =='/detection_data':
             self._set_headers()
             data = {
-                'red_postion': latest_red_pos,
+                'red_position': latest_red_pos,
                 'green_position': latest_green_pos,
                 'blue_position': latest_blue_pos,
                 'timestamp': time.time()
