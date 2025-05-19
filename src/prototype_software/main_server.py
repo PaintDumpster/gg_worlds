@@ -43,28 +43,24 @@ def run_vision_detection():
     global latest_red_pos, latest_green_pos, latest_blue_pos
 
     picam2 =Picamera2()
-    picam2.configure(picam2.create_preview_configuration(raw={'size';(1640,1232)},
-                                                        main={'format': 'RGB888','size':(1024,1024)}))
+    picam2.configure(picam2.create_preview_configuration(raw={"size":(1640,1232)},
+                                                        main={"format":"RGB888","size":(1024,1024)}))
 
-picam2 = Picamera2()
-picam2.configure(picam2.create_preview_configuration(raw={"size":(1640,1232)},
-                                                    main={"format":"RGB888","size":(1024,1024)}))
+    picam2.start()
+    time.sleep(2)
 
-picam2.start()
-time.sleep(2)
-
-try:
-    while True:
-        video = picam2.capture_array()
-        vd = visionDetector(video)
-        vd.detect_color()
-        latest_red_pos, latest_green_pos, latest_blue_pos = vd.detect()
-        vd.show()
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            break
-finally:
-    picam2.stop()
-    picam2.close()
+    try:
+        while True:
+            video = picam2.capture_array()
+            vd = visionDetector(video)
+            vd.detect_color()
+            latest_red_pos, latest_green_pos, latest_blue_pos = vd.detect()
+            vd.show()
+            if cv.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        picam2.stop()
+        picam2.close()
 
 if __name__ == "__main__":
     
