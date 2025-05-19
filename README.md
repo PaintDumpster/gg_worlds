@@ -190,6 +190,8 @@ https://civitai.com/models/663742/flux-vividizer-or-flux-enhancer?modelVersionId
 
 https://huggingface.co/black-forest-labs/FLUX.1-dev/tree/main
 
+https://huggingface.co/hfmaster/models/blob/ede8cefc744369a6abe0ccd23ab7b4cbff9c8846/flux/flux-turbo-8steps.safetensors
+
 https://huggingface.co/black-forest-labs/FLUX.1-schnell/tree/main
 
 https://huggingface.co/XLabs-AI/flux-lora-collection/tree/main
