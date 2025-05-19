@@ -181,3 +181,15 @@ comfyui-frontend-package is not installed →→→→ pip install -r requiremen
 - Height‑map dataset: NASADEM (NASA JPL)
 
 (MIT License – use at your own risk.)
+
+# Lora finetuning models
+
+https://civitai.com/models/736706/epic-gorgeous-details?modelVersionId=863655
+
+https://civitai.com/models/663742/flux-vividizer-or-flux-enhancer?modelVersionId=742813
+
+https://huggingface.co/black-forest-labs/FLUX.1-dev/tree/main
+
+https://huggingface.co/black-forest-labs/FLUX.1-schnell/tree/main
+
+https://huggingface.co/XLabs-AI/flux-lora-collection/tree/main
