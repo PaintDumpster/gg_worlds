@@ -62,41 +62,35 @@ class visionDetector:
 
         if len(contours) == 0:
             return None
-        
-        detections = []
 
-        for i, cnt in enumerate(contours):
-            area = cv.contourArea(cnt)
-            if area > 1000:
-                x,y,w,h = cv.boundingRect(cnt)
-                cv.rectangle(self.camera_input, (x,y), (x+w,y+h), color, 3)
-                cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 1.5, color, 2)
-                detections.append({
-                    f"{desc} {i}":{
-                        'x':x,
-                        'y':y,
-                        'w':w,
-                        'h':h,
-                        'center':{
-                            'x': x + w // 2,
-                            'y': y + h // 2
-                        }
-                    }
-                })
+        largest_cotour = max(contours, key=cv.contourArea)
+        area = cv.contourArea(largest_cotour)
 
-        return detections if detections else None
-    
-    def draw_json(self, positions, color):
-        for pos in positions:
-            for key, value in pos.items():
-                x = value['x']
-                y = value['y']
-                w = value['w']
-                h = value['h']
-                center_x = value['center']['x']
-                center_y = value['center']['y']
-                
-                cv.putText(self.camera_input, f"{key}:({center_x}, {center_y})", (x, y - 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+        if area > 1000:
+            x,y,w,h = cv.boundingRect(largest_cotour)
+            cv.rectangle(self.camera_input,(x,y), (x+w,y+h), color, 2)
+            cv.putText(self.camera_input, desc, (x,y-5), cv.FONT_HERSHEY_SIMPLEX, 1.5, color, 2)
+
+            detection = {
+                'x': x,
+                'y': y,
+                'w': w,
+                'h': h,
+                'center': {
+                    'x': x+w//2,
+                    'y': y+h//2
+                }
+            }
+
+            cv.putText(self.camera_input,
+                    f"({detection['center']['x']}, {detection['center']['y']})",
+                    (x,y+h+25),
+                    cv.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    color,
+                    1)
+            return detection
+        return None
 
     def detect(self):
         try:

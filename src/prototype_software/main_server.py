@@ -23,9 +23,9 @@ class DetectionDataHandler(BaseHTTPRequestHandler):
         if self.path =='/detection_data':
             self._set_headers()
             data = {
-                'red_position': latest_red_pos,
-                'green_position': latest_green_pos,
-                'blue_position': latest_blue_pos,
+                'red_position': (latest_red_pos['center']['x'],latest_red_pos['center']['y']) if latest_red_pos else None,
+                'green_position': (latest_green_pos['center']['x'],latest_green_pos['center']['y']) if latest_green_pos else None,
+                'blue_position': (latest_blue_pos['center']['x'],latest_blue_pos['center']['y']) if latest_blue_pos else None,
                 'timestamp': time.time()
             }
             self.wfile.write(json.dumps(data).encode())
