@@ -195,3 +195,5 @@ https://huggingface.co/hfmaster/models/blob/ede8cefc744369a6abe0ccd23ab7b4cbff9c
 https://huggingface.co/black-forest-labs/FLUX.1-schnell/tree/main
 
 https://huggingface.co/XLabs-AI/flux-lora-collection/tree/main
+
+https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/flux1-dev.safetensors
