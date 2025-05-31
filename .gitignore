@@ -409,3 +409,6 @@ cache/
 Exportedobjs/
 
 # ignore metadata.ipynb file
+# Ignore SDXL and adapter model folders
+models/
+sample img/
