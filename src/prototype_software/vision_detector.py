@@ -12,8 +12,6 @@ class visionDetector:
         self.r_mask = None
         self.g_mask = None
         self.b_mask = None
-
-        self.qr = None
         
     def morphops(self, mask):
         pass
@@ -93,10 +91,6 @@ class visionDetector:
                     1)
             return detection
         return None
-    
-    def qr_detection(self):
-        detector = cv.QRCodeDetector()
-        return detector(self.camera_input)
 
     def detect(self):
         try:
@@ -115,3 +109,19 @@ class visionDetector:
     def show(self):
 
         cv.imshow("Camera Input", self.camera_input)
+
+class qr_detector(visionDetector):
+    def __init__(self, camera_input=None):
+        super().__init__(camera_input)
+        self.qr_detector = cv.QRCodeDetector
+
+    def qr_detection(self):
+        try:
+            if self.camera_input is None:
+                return None
+            data, points, _ = self.qr_detector(self.camera_input)
+            if points is not None:
+                points = points[0]
+                for i in range(len(points)):
+                    cv.line(self.camera_input, tuple(points[i]), tuple(points[(i + 1) % len(points)]), (0, 255, 0), 2)
+                return data

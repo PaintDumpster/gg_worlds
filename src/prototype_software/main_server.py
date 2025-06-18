@@ -55,6 +55,10 @@ def run_vision_detection():
             vd = visionDetector(video)
             vd.detect_color()
             latest_red_pos, latest_green_pos, latest_blue_pos = vd.detect()
+
+            value, points, qrcode = vd.qr_detection()
+
+
             vd.show()
             if cv.waitKey(1) & 0xFF == ord('q'):
                 break
