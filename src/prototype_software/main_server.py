@@ -1,5 +1,5 @@
 import cv2 as cv
-from vision_detector import visionDetector
+from vision_detector import visionDetector, QRCodeDetector
 from picamera2 import Picamera2
 import time
 import threading
@@ -10,6 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 latest_red_pos = None
 latest_green_pos = None
 latest_blue_pos = None
+latest_qr_data = None
 
 ## modified class for http server handler
 class DetectionDataHandler(BaseHTTPRequestHandler):
@@ -26,6 +27,7 @@ class DetectionDataHandler(BaseHTTPRequestHandler):
                 'red_position': (latest_red_pos['center']['x'],latest_red_pos['center']['y']) if latest_red_pos else None,
                 'green_position': (latest_green_pos['center']['x'],latest_green_pos['center']['y']) if latest_green_pos else None,
                 'blue_position': (latest_blue_pos['center']['x'],latest_blue_pos['center']['y']) if latest_blue_pos else None,
+                'qr_data': latest_qr_data,
                 'timestamp': time.time()
             }
             self.wfile.write(json.dumps(data).encode())
@@ -40,7 +42,7 @@ def start_server(port=8765):
     httpd.serve_forever()
 
 def run_vision_detection():
-    global latest_red_pos, latest_green_pos, latest_blue_pos
+    global latest_red_pos, latest_green_pos, latest_blue_pos, latest_qr_data
 
     picam2 =Picamera2()
     picam2.configure(picam2.create_preview_configuration(raw={"size":(1640,1232)},
@@ -56,10 +58,13 @@ def run_vision_detection():
             vd.detect_color()
             latest_red_pos, latest_green_pos, latest_blue_pos = vd.detect()
 
-            value, points, qrcode = vd.qr_detection()
+            qr_detector = QRCodeDetector(video)
+            qr_content,_,_= qr_detector.detect_qr()
+            latest_qr_data = qr_content
 
-
+            vd.camera_input = qr_detector.camera_input
             vd.show()
+            
             if cv.waitKey(1) & 0xFF == ord('q'):
                 break
     finally:
