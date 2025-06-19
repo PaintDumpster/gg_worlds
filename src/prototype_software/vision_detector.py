@@ -109,45 +109,55 @@ class visionDetector:
     def show(self):
 
         cv.imshow("Camera Input", self.camera_input)
-
 class QRCodeDetector(visionDetector):
     def __init__(self, camera_input=None):
         super().__init__(camera_input)
-        self.qr_detector = cv.QRCodeDetector()  # Create an instance of QRCodeDetector
+        self.qr_detector = cv.QRCodeDetector()
     
     def detect_qr(self):
         """Detects QR codes in the camera input and returns their content"""
-        if self.camera_input is None:
+        if self.camera_input is None or not isinstance(self.camera_input, np.ndarray):
             return None, None, None
-        
-        # Detect QR code
-        qr_content, points, straight_qrcode = self.qr_detector.detectAndDecode(self.camera_input)
-        
-        # If QR code is detected and has content
-        if points is not None and qr_content:
-            points = points.astype(int)
             
-            # Draw boundary around QR code
-            for i in range(len(points[0])):
-                cv.line(self.camera_input, 
-                       tuple(points[0][i]), 
-                       tuple(points[0][(i+1) % len(points[0])]), 
-                       (0, 255, 0), 
-                       2)
+        try:
+            # Make a copy of the image to avoid modifying the original
+            frame = self.camera_input.copy()
             
-            # Calculate center of QR code for text placement
-            center_x = int(np.mean(points[0][:, 0]))
-            center_y = int(np.mean(points[0][:, 1]))
+            # Convert to grayscale for better QR detection
+            gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             
-            # Display QR code content
-            cv.putText(self.camera_input, 
-                      qr_content, 
-                      (center_x, center_y - 20), 
-                      cv.FONT_HERSHEY_SIMPLEX, 
-                      0.8, 
-                      (0, 0, 255), 
-                      2)
+            # Detect QR code
+            qr_content, points, straight_qrcode = self.qr_detector.detectAndDecode(frame)
             
-            return qr_content, points, straight_qrcode
-        
-        return None, None, None
+            # If QR code is detected and has content
+            if points is not None and qr_content:
+                points = points.astype(np.int32)
+                
+                # Draw boundary around QR code
+                for i in range(len(points[0])):
+                    cv.line(self.camera_input, 
+                           tuple(points[0][i]), 
+                           tuple(points[0][(i+1) % len(points[0])]), 
+                           (0, 255, 0), 
+                           2)
+                
+                # Calculate center of QR code for text placement
+                center_x = int(np.mean(points[0][:, 0]))
+                center_y = int(np.mean(points[0][:, 1]))
+                
+                # Display QR code content
+                cv.putText(self.camera_input, 
+                          qr_content, 
+                          (center_x, center_y - 20), 
+                          cv.FONT_HERSHEY_SIMPLEX, 
+                          0.8, 
+                          (0, 0, 255), 
+                          2)
+                
+                return qr_content, points, straight_qrcode
+            
+            return None, None, None
+            
+        except Exception as e:
+            print(f"Error in QR detection: {e}")
+            return None, None, None
