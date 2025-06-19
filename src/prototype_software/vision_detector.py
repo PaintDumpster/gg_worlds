@@ -113,51 +113,104 @@ class QRCodeDetector(visionDetector):
     def __init__(self, camera_input=None):
         super().__init__(camera_input)
         self.qr_detector = cv.QRCodeDetector()
+        
+        # Stabilization parameters
+        self.last_qr_content = None
+        self.last_qr_points = None
+        self.detection_history = []
+        self.history_max_size = 5
+        self.confidence_threshold = 3  # Number of consecutive detections needed
+        self.last_detection_time = 0
+        self.persistence_time = 1.0  # seconds to keep displaying a QR after losing track
     
     def detect_qr(self):
-        """Detects QR codes in the camera input and returns their content"""
+        """Detects QR codes in the camera input and returns their content with stabilization"""
         if self.camera_input is None or not isinstance(self.camera_input, np.ndarray):
             return None, None, None
             
+        current_time = time.time()
         try:
             # Make a copy of the image to avoid modifying the original
             frame = self.camera_input.copy()
             
-            # Convert to grayscale for better QR detection
-            gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            # Image preprocessing for better detection
+            # 1. Apply Gaussian blur to reduce noise
+            blurred = cv.GaussianBlur(frame, (5, 5), 0)
             
-            # Detect QR code
-            qr_content, points, straight_qrcode = self.qr_detector.detectAndDecode(frame)
+            # 2. Enhance contrast
+            lab = cv.cvtColor(blurred, cv.COLOR_BGR2LAB)
+            l, a, b = cv.split(lab)
+            clahe = cv.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+            cl = clahe.apply(l)
+            enhanced = cv.merge((cl, a, b))
+            enhanced = cv.cvtColor(enhanced, cv.COLOR_LAB2BGR)
             
-            # If QR code is detected and has content
+            # Detect QR code with enhanced image
+            qr_content, points, straight_qrcode = self.qr_detector.detectAndDecode(enhanced)
+            
+            # Apply temporal filtering and stabilization
             if points is not None and qr_content:
-                points = points.astype(np.int32)
+                # We have a new detection
+                self.detection_history.append(qr_content)
+                self.last_detection_time = current_time
                 
+                # Keep history at max size
+                if len(self.detection_history) > self.history_max_size:
+                    self.detection_history.pop(0)
+                
+                # Check if we have stable detection
+                if self.is_stable_detection():
+                    self.last_qr_content = qr_content
+                    self.last_qr_points = points.astype(np.int32)
+            else:
+                # No detection in current frame
+                # Check if we should keep displaying the last detection
+                if current_time - self.last_detection_time > self.persistence_time:
+                    # Reset if too much time passed
+                    if len(self.detection_history) > 0:
+                        self.detection_history.pop(0)
+                    
+                    if len(self.detection_history) == 0:
+                        self.last_qr_content = None
+                        self.last_qr_points = None
+            
+            # Draw the QR code if we have a stable detection
+            if self.last_qr_content is not None and self.last_qr_points is not None:
                 # Draw boundary around QR code
-                for i in range(len(points[0])):
+                for i in range(len(self.last_qr_points[0])):
                     cv.line(self.camera_input, 
-                           tuple(points[0][i]), 
-                           tuple(points[0][(i+1) % len(points[0])]), 
+                           tuple(self.last_qr_points[0][i]), 
+                           tuple(self.last_qr_points[0][(i+1) % len(self.last_qr_points[0])]), 
                            (0, 255, 0), 
                            2)
                 
                 # Calculate center of QR code for text placement
-                center_x = int(np.mean(points[0][:, 0]))
-                center_y = int(np.mean(points[0][:, 1]))
+                center_x = int(np.mean(self.last_qr_points[0][:, 0]))
+                center_y = int(np.mean(self.last_qr_points[0][:, 1]))
                 
                 # Display QR code content
                 cv.putText(self.camera_input, 
-                          qr_content, 
+                          self.last_qr_content, 
                           (center_x, center_y - 20), 
                           cv.FONT_HERSHEY_SIMPLEX, 
                           0.8, 
                           (0, 0, 255), 
                           2)
                 
-                return qr_content, points, straight_qrcode
-            
-            return None, None, None
+            return self.last_qr_content, self.last_qr_points, straight_qrcode
             
         except Exception as e:
             print(f"Error in QR detection: {e}")
-            return None, None, None
+            return self.last_qr_content, self.last_qr_points, None
+    
+    def is_stable_detection(self):
+        """Check if the detection is stable by looking at recent history"""
+        if len(self.detection_history) < self.confidence_threshold:
+            return False
+            
+        # Check if we have enough of the same detection
+        recent_detections = self.detection_history[-self.confidence_threshold:]
+        most_common = max(set(recent_detections), key=recent_detections.count)
+        count = recent_detections.count(most_common)
+        
+        return count >= self.confidence_threshold - 1  # Allow one mismatch for robustness
