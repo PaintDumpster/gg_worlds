@@ -409,3 +409,7 @@ cache/
 Exportedobjs/
 
 # ignore metadata.ipynb file
+
+# API keys and environment secrets
+secrets.json
+.env
